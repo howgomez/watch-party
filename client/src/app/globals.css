@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+/* ============================
+   Sistema de Diseño - WatchParty
+   Paleta: Dark Mode Premium con acentos púrpura/azul
+   ============================ */
+
+:root {
+  /* Fondos */
+  --bg-primary: #0B0B0F;
+  --bg-secondary: #13131A;
+  --bg-elevated: #1A1A24;
+  --bg-glass: rgba(26, 26, 36, 0.6);
+
+  /* Textos */
+  --text-primary: #F0F0F5;
+  --text-secondary: #8B8B9E;
+  --text-muted: #55556A;
+
+  /* Acentos */
+  --accent-primary: #7C5CFC;
+  --accent-secondary: #5B8DEF;
+  --accent-gradient: linear-gradient(135deg, #7C5CFC 0%, #5B8DEF 100%);
+  --accent-glow: rgba(124, 92, 252, 0.25);
+
+  /* Bordes */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-accent: rgba(124, 92, 252, 0.3);
+
+  /* Estados */
+  --success: #34D399;
+  --danger: #EF4444;
+  --warning: #FBBF24;
+}
+
+@theme inline {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-glass: var(--bg-glass);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-glow: var(--accent-glow);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-accent: var(--border-accent);
+
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+/* ============================
+   Estilos Base
+   ============================ */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-elevated) transparent;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================
+   Utilidades Reutilizables
+   ============================ */
+
+/* Efecto de cristal translúcido (Glassmorphism) */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Resplandor sutil en púrpura detrás de elementos "flotantes" */
+.glow {
+  box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(124, 92, 252, 0.08);
+}
+
+/* Gradiente animado para botones o fondos de acento */
+.gradient-accent {
+  background: var(--accent-gradient);
+}
+
+/* Animación de entrada suave desde abajo */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* Animación de pulso suave para indicadores "en vivo" */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(124, 92, 252, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(124, 92, 252, 0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Animaciones adicionales para buscador */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in-from-top {
+  animation: slideInFromTop 0.2s ease-out forwards;
+}

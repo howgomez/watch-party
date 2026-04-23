@@ -1,0 +1,83 @@
+### Variables
+@baseUrl = http://localhost:3001/api
+
+# Reemplaza estas variables con tus datos a medida que haces peticiones
+@authToken = tu_token_aqui
+@roomCode = codigo_de_la_sala_aqui
+@roomId = uuid_de_la_sala_aqui
+
+### ==================== AUTH MODULE ====================
+
+### 1. Registrar un nuevo usuario
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "test2@example.com",
+  "username": "testuser2",
+  "password": "password123"
+}
+
+### 2. Login (Obtener Token) -> Copia el token de la respuesta y ponlo en @authToken arriba
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test2@example.com",
+  "password": "password123"
+}
+
+### 3. Obtener tus datos (Requiere Token)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{authToken}}
+
+
+### ==================== MEDIA MODULE ====================
+
+### 4. Validar una URL de video (Requiere Token)
+POST {{baseUrl}}/media/parse
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+}
+
+
+### ==================== ROOMS MODULE ====================
+
+### 5. Crear una sala (Requiere Token) -> Copia el "code" y ponlo en @roomCode arriba
+POST {{baseUrl}}/rooms
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Noche de pelis",
+  "media_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "media_type": "YOUTUBE"
+}
+
+### 6. Ver todas las salas
+GET {{baseUrl}}/rooms
+
+### 7. Buscar sala por código
+GET {{baseUrl}}/rooms/{{roomCode}}
+
+### 8. Unirse a una sala (Requiere Token)
+POST {{baseUrl}}/rooms/{{roomCode}}/join
+Authorization: Bearer {{authToken}}
+
+### 9. Salir de la sala (Requiere Token)
+POST {{baseUrl}}/rooms/{{roomCode}}/leave
+Authorization: Bearer {{authToken}}
+
+### 10. Eliminar sala (Solo el creador/host, Requiere Token)
+DELETE {{baseUrl}}/rooms/{{roomCode}}
+Authorization: Bearer {{authToken}}
+
+
+### ==================== CHAT MODULE ====================
+
+### 11. Ver el historial de mensajes (Requiere el ID real de la sala, no el code. Requiere Token)
+GET {{baseUrl}}/chats/{{roomId}}
+Authorization: Bearer {{authToken}}
