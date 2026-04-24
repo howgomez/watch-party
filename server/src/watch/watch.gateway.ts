@@ -114,6 +114,27 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { event: 'room:leave', data: { roomId: payload.roomId } };
   }
 
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage('player:request_sync')
+  async handleRequestSync(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: { roomId: string },
+  ) {
+    const state = await this.redisService.getPlayerState(payload.roomId);
+    if (state) {
+      const syncState = { ...state };
+      if (syncState.isPlaying) {
+        const elapsedSeconds = (Date.now() - syncState.updatedAt) / 1000;
+        syncState.currentTime += elapsedSeconds;
+        syncState.updatedAt = Date.now();
+      }
+      client.emit('player:sync', {
+        event: 'player:sync',
+        data: syncState,
+      });
+    }
+  }
+
   // --- Controles del Reproductor (Se emite a los demas en la sala) ---
 
   @UseGuards(WsJwtGuard)
@@ -263,10 +284,13 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: { roomId: string; video: any },
   ) {
+    // 1. Guardamos el video en la base de datos (tabla PlaylistItem)
+    // Le agregamos el email de la persona que lo sugirió para mostrarlo en el frontend.
     await this.roomsService.addToQueue(payload.roomId, {
       ...payload.video,
       addedBy: client.user.email,
     });
+    // 2. Le avisamos a TODOS en la sala que la cola se actualizó
     await this.broadcastQueue(payload.roomId);
     return { event: 'queue:add', data: 'ok' };
   }
@@ -277,7 +301,9 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: { roomId: string; itemId: string },
   ) {
+    // 1. Eliminamos el item de la base de datos usando Prisma
     await this.roomsService.removeFromQueue(payload.itemId);
+    // 2. Volvemos a emitir la cola actualizada a toda la sala
     await this.broadcastQueue(payload.roomId);
     return { event: 'queue:remove', data: 'ok' };
   }
@@ -288,31 +314,36 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: { roomId: string },
   ) {
-    // Solo el host debería disparar el auto-next para evitar duplicados
+    // SEGURIDAD: Solo el "Host" debería poder disparar el evento de que el video terminó.
+    // Esto evita que si hay 10 personas en la sala, el servidor intente saltar de video 10 veces al mismo tiempo.
     const room = await this.prisma.room.findUnique({ where: { id: payload.roomId } });
     if (!room || room.host_id !== client.user.sub) return;
 
+    // Sacamos el SIGUIENTE video de la cola (pop: lo obtiene y lo borra de la cola automáticamente)
     const nextVideo = await this.roomsService.popNextFromQueue(payload.roomId);
+    
     if (nextVideo) {
-      // 1. Actualizar DB
+      // 1. Si hay un video siguiente, actualizamos la URL oficial de la sala en la BD
       await this.prisma.room.update({
         where: { id: payload.roomId },
         data: { media_url: nextVideo.url }
       });
 
-      // 2. Resetear Redis
+      // 2. Reseteamos el estado del reproductor en Redis (lo mandamos al minuto 0:00 y le damos play)
       const state = { currentTime: 0, isPlaying: true, updatedAt: Date.now() };
       await this.redisService.setPlayerState(payload.roomId, state);
 
-      // 3. Notificar a todos
+      // 3. Notificamos a todas las pantallas de los usuarios para que carguen el nuevo video...
       this.server.to(payload.roomId).emit('room:video_changed', {
         mediaUrl: nextVideo.url,
       });
+      // ... y sincronizamos el tiempo (minuto 0)
       this.server.to(payload.roomId).emit('player:sync', {
         event: 'player:sync',
         data: state,
       });
       
+      // Finalmente, actualizamos visualmente la lista de la cola porque ahora tiene un video menos
       await this.broadcastQueue(payload.roomId);
     }
   }

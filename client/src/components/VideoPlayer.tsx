@@ -294,7 +294,9 @@ export default function VideoPlayer({ url, roomId, isHost }: VideoPlayerProps) {
                 rel: 0,
                 modestbranding: 1,
                 showinfo: 0,
-                disablekb: 1 // Desactiva atajos de teclado nativos
+                disablekb: 1, // Desactiva atajos de teclado nativos
+                origin: typeof window !== 'undefined' ? window.location.origin : '',
+                widget_referrer: typeof window !== 'undefined' ? window.location.href : ''
               },
             },
           }}
@@ -311,12 +313,20 @@ export default function VideoPlayer({ url, roomId, isHost }: VideoPlayerProps) {
         />
       )}
 
-      {/* Overlay inicial para Autoplay (solo Invitados) */}
-      {!isHost && !hasInteracted && (
-        <div className="absolute inset-0 z-10 flex items-start justify-center pt-8 pointer-events-none">
-          <div className="bg-accent-primary/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 glow animate-bounce">
-            <Play size={20} />
-            Haz clic en el video para sincronizar
+      {/* Overlay inicial para Autoplay (Todos) */}
+      {!hasInteracted && (
+        <div 
+          className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm cursor-pointer"
+          onClick={() => {
+            setHasInteracted(true);
+            if (socket) {
+              socket.emit('player:request_sync', { roomId });
+            }
+          }}
+        >
+          <div className="bg-accent-primary text-white px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 glow animate-pulse hover:scale-105 transition-transform">
+            <Play size={26} fill="currentColor" />
+            Haz clic aquí para unirte a la sala
           </div>
         </div>
       )}
