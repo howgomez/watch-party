@@ -86,12 +86,26 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
       syncState.updatedAt = Date.now();
     }
 
-    // Le enviamos el estado actual al cliente que se acaba de unir
-    // para que su reproductor se sincronice de inmediato en el minuto exacto.
-    client.emit('player:sync', {
-      event: 'player:sync',
+    // --- NUEVA MECÁNICA: PAUSA AUTOMÁTICA ---
+    // Cuando un nuevo usuario entra, pausamos el video para toda la sala.
+    // Esto permite que el usuario cargue el video en paz, y cuando el Host
+    // decida darle "play", forzará a todos a sincronizarse y reproducir a la vez.
+    syncState.isPlaying = false;
+    await this.redisService.setPlayerState(payload.roomId, syncState);
+
+    // Avisamos A TODA LA SALA (incluyendo al Host y al nuevo) que el video se pausó
+    this.server.to(payload.roomId).emit('player:sync', {
+      event: 'player:pause',
       data: syncState,
     });
+
+    // --- NOTIFICACIÓN DE SISTEMA: Nuevo usuario ---
+    const user = await this.prisma.user.findUnique({ where: { id: client.user.sub } });
+    if (user) {
+      this.server.to(payload.roomId).emit('chat:system_alert', {
+        content: `${user.username} se ha unido. Pausamos para sincronizar... 🕒`
+      });
+    }
 
     return {
       event: 'room:join',
@@ -210,6 +224,22 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
     return { event: 'player:seek', data: 'ok' };
+  }
+
+  // --- Sincronización a Petición (Guest -> Host) ---
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage('player:request_sync')
+  handleRequestSync(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: { roomId: string },
+  ) {
+    // Un invitado está pidiendo la hora exacta actual.
+    // Le avisamos a toda la sala (principalmente al Host) para que re-emita su estado.
+    client.to(payload.roomId).emit('player:host_request_sync', {
+      event: 'player:host_request_sync',
+      data: 'Guest requested sync',
+    });
+    return { event: 'player:request_sync', data: 'ok' };
   }
 
   // --- Manejo del Chat ---
