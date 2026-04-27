@@ -13,14 +13,18 @@ interface QueuePanelProps {
 export default function QueuePanel({ queue, roomId, isHost }: QueuePanelProps) {
   const socket = getSocket();
 
+  // Función para eliminar un video de la cola (Solo Host)
   const handleRemove = (itemId: string) => {
+    // Emitimos el evento al backend enviando el ID del video que queremos borrar.
+    // El backend se encarga de borrarlo de la BD y notificar a todos con 'queue:update'.
     socket?.emit('queue:remove', { roomId, itemId });
   };
 
+  // Función para forzar la reproducción inmediata de un video de la cola (Solo Host)
   const handlePlayNow = (url: string, itemId: string) => {
-    // Primero cambiamos el video
+    // 1. Le decimos a toda la sala que cambie el video actual
     socket?.emit('room:change_video', { roomId, newUrl: url });
-    // Luego lo quitamos de la cola
+    // 2. Quitamos ese video de la cola para que no se repita luego
     socket?.emit('queue:remove', { roomId, itemId });
   };
 

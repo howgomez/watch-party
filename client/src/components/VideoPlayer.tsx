@@ -442,6 +442,9 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
                 rel: 0,
                 modestbranding: 1,
                 showinfo: 0,
+                disablekb: 1, // Desactiva atajos de teclado nativos
+                origin: typeof window !== 'undefined' ? window.location.origin : '',
+                widget_referrer: typeof window !== 'undefined' ? window.location.href : ''
                 disablekb: 1,
                 enablejsapi: 1,
                 // `start` le dice a YouTube en qué segundo arrancar.
@@ -468,6 +471,20 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
         />
       )}
 
+      {/* Overlay inicial para Autoplay (Todos) */}
+      {!hasInteracted && (
+        <div 
+          className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm cursor-pointer"
+          onClick={() => {
+            setHasInteracted(true);
+            if (socket) {
+              socket.emit('player:request_sync', { roomId });
+            }
+          }}
+        >
+          <div className="bg-accent-primary text-white px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 glow animate-pulse hover:scale-105 transition-transform">
+            <Play size={26} fill="currentColor" />
+            Haz clic aquí para unirte a la sala
       {/* Overlay inicial para Invitados: escudo que bloquea clics al iframe de YouTube.
           z-30 para estar por encima del escudo de clics y los controles. */}
       {!isTwitch && !isHost && !hasInteracted && (
