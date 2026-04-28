@@ -444,13 +444,11 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
                 showinfo: 0,
                 disablekb: 1, // Desactiva atajos de teclado nativos
                 origin: typeof window !== 'undefined' ? window.location.origin : '',
-                widget_referrer: typeof window !== 'undefined' ? window.location.href : ''
-                disablekb: 1,
+                widget_referrer: typeof window !== 'undefined' ? window.location.href : '',
                 enablejsapi: 1,
                 // `start` le dice a YouTube en qué segundo arrancar.
                 // Solo surte efecto al montar el componente por primera vez.
                 start: startTimeRef.current,
-                origin: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
               },
             },
             twitch: {
@@ -473,7 +471,7 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
 
       {/* Overlay inicial para Autoplay (Todos) */}
       {!hasInteracted && (
-        <div 
+        <div
           className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm cursor-pointer"
           onClick={() => {
             setHasInteracted(true);
@@ -485,6 +483,10 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
           <div className="bg-accent-primary text-white px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 glow animate-pulse hover:scale-105 transition-transform">
             <Play size={26} fill="currentColor" />
             Haz clic aquí para unirte a la sala
+          </div>
+        </div>
+      )}
+
       {/* Overlay inicial para Invitados: escudo que bloquea clics al iframe de YouTube.
           z-30 para estar por encima del escudo de clics y los controles. */}
       {!isTwitch && !isHost && !hasInteracted && (
@@ -529,9 +531,9 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
             onTouchEnd={handleSeekMouseUp as any}
             disabled={!isHost}
             className={`w-full h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-0
-            [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-            [&::-webkit-slider-thumb]:bg-accent-primary [&::-webkit-slider-thumb]:rounded-full
-            ${!isHost ? 'opacity-70 cursor-not-allowed' : ''}`}
+      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
+      [&::-webkit-slider-thumb]:bg-accent-primary [&::-webkit-slider-thumb]:rounded-full
+      ${!isHost ? 'opacity-70 cursor-not-allowed' : ''}`}
             style={{
               background: `linear-gradient(to right, var(--accent-primary) ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`
             }}
@@ -558,9 +560,9 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
                   value={muted ? 0 : volume}
                   onChange={handleVolumeChange}
                   className="w-0 group-hover:w-20 transition-all duration-300 h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer focus:outline-none
-                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-                  [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full
-                  opacity-0 group-hover:opacity-100"
+            [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
+            [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full
+            opacity-0 group-hover:opacity-100"
                   style={{
                     background: `linear-gradient(to right, white ${(muted ? 0 : volume) * 100}%, rgba(255,255,255,0.3) ${(muted ? 0 : volume) * 100}%)`
                   }}
@@ -588,3 +590,4 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
     </div>
   );
 }
+

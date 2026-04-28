@@ -39,7 +39,7 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private redisService: RedisService,
     private prisma: PrismaService,
     private roomsService: RoomsService, // Inyectamos el servicio de salas
-  ) {}
+  ) { }
 
   // --- Helpers ---
   private async broadcastQueue(roomId: string) {
@@ -64,7 +64,7 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() payload: { roomId: string },
   ) {
     client.join(payload.roomId);
-    
+
     // Leemos el estado desde Redis (usamos await porque Redis es asíncrono)
     let state = await this.redisService.getPlayerState(payload.roomId);
 
@@ -128,26 +128,26 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { event: 'room:leave', data: { roomId: payload.roomId } };
   }
 
-  @UseGuards(WsJwtGuard)
-  @SubscribeMessage('player:request_sync')
-  async handleRequestSync(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: { roomId: string },
-  ) {
-    const state = await this.redisService.getPlayerState(payload.roomId);
-    if (state) {
-      const syncState = { ...state };
-      if (syncState.isPlaying) {
-        const elapsedSeconds = (Date.now() - syncState.updatedAt) / 1000;
-        syncState.currentTime += elapsedSeconds;
-        syncState.updatedAt = Date.now();
-      }
-      client.emit('player:sync', {
-        event: 'player:sync',
-        data: syncState,
-      });
-    }
-  }
+  // @UseGuards(WsJwtGuard)
+  // @SubscribeMessage('player:request_sync')
+  // async handleRequestSync(
+  //   @ConnectedSocket() client: AuthenticatedSocket,
+  //   @MessageBody() payload: { roomId: string },
+  // ) {
+  //   const state = await this.redisService.getPlayerState(payload.roomId);
+  //   if (state) {
+  //     const syncState = { ...state };
+  //     if (syncState.isPlaying) {
+  //       const elapsedSeconds = (Date.now() - syncState.updatedAt) / 1000;
+  //       syncState.currentTime += elapsedSeconds;
+  //       syncState.updatedAt = Date.now();
+  //     }
+  //     client.emit('player:sync', {
+  //       event: 'player:sync',
+  //       data: syncState,
+  //     });
+  //   }
+  // }
 
   // --- Controles del Reproductor (Se emite a los demas en la sala) ---
 
@@ -159,13 +159,13 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     // 1. Buscamos el estado actual en Redis
     const state = await this.redisService.getPlayerState(payload.roomId);
-    
+
     if (state) {
       // 2. Modificamos los valores
       state.isPlaying = true;
       state.currentTime = payload.currentTime;
       state.updatedAt = Date.now();
-      
+
       // 3. Volvemos a guardarlo en Redis
       await this.redisService.setPlayerState(payload.roomId, state);
     }
@@ -175,7 +175,7 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
       event: 'player:play',
       data: state,
     });
-    
+
     return { event: 'player:play', data: 'ok' };
   }
 
@@ -186,12 +186,12 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() payload: { roomId: string; currentTime: number },
   ) {
     const state = await this.redisService.getPlayerState(payload.roomId);
-    
+
     if (state) {
       state.isPlaying = false;
       state.currentTime = payload.currentTime;
       state.updatedAt = Date.now();
-      
+
       await this.redisService.setPlayerState(payload.roomId, state);
     }
 
@@ -210,11 +210,11 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() payload: { roomId: string; currentTime: number },
   ) {
     const state = await this.redisService.getPlayerState(payload.roomId);
-    
+
     if (state) {
       state.currentTime = payload.currentTime;
       state.updatedAt = Date.now();
-      
+
       await this.redisService.setPlayerState(payload.roomId, state);
     }
 
@@ -351,7 +351,7 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Sacamos el SIGUIENTE video de la cola (pop: lo obtiene y lo borra de la cola automáticamente)
     const nextVideo = await this.roomsService.popNextFromQueue(payload.roomId);
-    
+
     if (nextVideo) {
       // 1. Si hay un video siguiente, actualizamos la URL oficial de la sala en la BD
       await this.prisma.room.update({
@@ -372,7 +372,7 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
         event: 'player:sync',
         data: state,
       });
-      
+
       // Finalmente, actualizamos visualmente la lista de la cola porque ahora tiene un video menos
       await this.broadcastQueue(payload.roomId);
     }
