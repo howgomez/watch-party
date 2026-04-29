@@ -75,7 +75,7 @@ export default function ChatPanel({ roomId }: ChatPanelProps) {
         content: '',
         room_id: roomId,
         user_id: 'system',
-        user: { id: 'system', username: 'Sistema', email: '' },
+        user: { id: 'system', username: 'Sistema' },
         created_at: new Date().toISOString(),
         isSystem: true,
         systemContent: data.content

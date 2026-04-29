@@ -437,7 +437,9 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
                 crossOrigin: 'anonymous'
               }
             },
+            // @ts-ignore
             youtube: {
+              // @ts-ignore
               playerVars: {
                 rel: 0,
                 modestbranding: 1,
@@ -452,6 +454,8 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
               },
             },
             twitch: {
+              // @ts-ignore
+
               options: {
                 parent: ['localhost']
               }
