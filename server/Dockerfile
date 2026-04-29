@@ -33,7 +33,7 @@ RUN pnpm install --prod --frozen-lockfile
 COPY --from=builder /app/dist ./dist
 
 # Exponemos el puerto de tu API (asumiendo que NestJS usa el 3000 o 3001)
-EXPOSE 3000
+EXPOSE 3001
 
 # El comando maestro que se ejecutará cuando encendamos el contenedor
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]

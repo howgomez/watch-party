@@ -44,7 +44,7 @@ jobs:
         run: sleep 5 # Ajusta el tiempo si postgres tarda más en arrancar
 
       - name: Generate Prisma Client
-        run: pnpm dlx prisma generate
+        run: pnpm exec prisma generate
         
       - name: Run ESLint
         run: pnpm run lint
@@ -63,3 +63,29 @@ jobs:
       - name: Stop services
         if: always()
         run: docker compose down
+
+  # --- NUEVA FASE DE DEPLOYMENT (CD) ---
+  deploy:
+    # Solo ejecuta este trabajo si el anterior (build-and-test) fue exitoso
+    needs: build-and-test
+    # Solo despliega si estamos en la rama master
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Production Server
+        uses: appleboy/ssh-action@master
+        with:
+          # Estas son variables secretas que configuraremos en GitHub
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # Entramos a la carpeta de tu proyecto en el VPS
+            cd /home/usuario/watch-party/server
+            
+            # Descargamos los últimos cambios de GitHub
+            git pull origin master
+            
+            # Reconstruimos la imagen y encendemos todo sin apagar el servidor
+            docker compose up -d --build

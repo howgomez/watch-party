@@ -10,8 +10,8 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    
-  redis: 
+
+  redis:
     image: redis:7-alpine
     container_name: watchparty-redis
     ports:
@@ -19,7 +19,7 @@ services:
     volumes:
       - redis_data:/data
 
-  backend: 
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
@@ -35,6 +35,20 @@ services:
     depends_on:
       - postgres
       - redis
+
+  frontend:
+    build:
+      # Como este compose está en la carpeta server, le decimos que suba un nivel y entre a client
+      context: ../client
+      dockerfile: Dockerfile
+    container_name: watchparty-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # Esta URL la usa el navegador de tus usuarios para hablarle a tu backend
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
