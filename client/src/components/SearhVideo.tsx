@@ -1,4 +1,5 @@
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Check } from 'lucide-react';
+import { useState } from 'react';
 import { getSocket } from '@/lib/socket';
 import { useRoomStore } from '@/stores/room-store';
 import { useVideoSearch } from '@/hooks/useVideoSearch';
@@ -7,6 +8,7 @@ interface SearchVideoProps {
   isHost: boolean;
   onSelect?: (url: string) => void; // Para cuando se usa en "Crear Sala"
   showQueueButton?: boolean;
+  resultsPosition?: 'absolute' | 'relative'; // Nueva prop
 }
 
 /**
@@ -14,9 +16,15 @@ interface SearchVideoProps {
  * Utiliza el hook useVideoSearch para manejar la lógica.
  * Puede ser usado en la sala para cambiar el video o en la creación de sala.
  */
-export default function SearchVideo({ isHost, onSelect, showQueueButton = true }: SearchVideoProps) {
+export default function SearchVideo({ 
+  isHost, 
+  onSelect, 
+  showQueueButton = true,
+  resultsPosition = 'absolute'
+}: SearchVideoProps) {
   const { query, results, isSearching, search, clearSearch } = useVideoSearch();
   const currentRoom = useRoomStore((state) => state.currentRoom);
+  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
 
   const handleSelect = (url: string) => {
     if (onSelect) {
@@ -30,13 +38,22 @@ export default function SearchVideo({ isHost, onSelect, showQueueButton = true }
   const handleAddToQueue = (video: any) => {
     if (currentRoom) {
       getSocket()?.emit('queue:add', { roomId: currentRoom.id, video });
+      
+      // Feedback visual
+      setAddedIds(prev => new Set(prev).add(video.id));
+      setTimeout(() => {
+        setAddedIds(prev => {
+          const next = new Set(prev);
+          next.delete(video.id);
+          return next;
+        });
+      }, 2000);
     }
-    clearSearch();
   };
 
   return (
-    <div className="relative group w-full">
-      <div className="glass rounded-xl p-2 flex flex-col gap-2 relative z-50">
+    <div className={`relative group w-full ${resultsPosition === 'relative' ? 'flex flex-col min-h-0' : ''}`}>
+      <div className={`glass rounded-xl p-2 flex flex-col gap-2 relative z-50 shrink-0`}>
         <div className="flex items-center gap-2">
           <div className="flex-1 flex items-center gap-2 bg-black/20 rounded-lg px-3 py-2 border border-border-subtle focus-within:border-accent-primary/50 transition-colors">
             <Search size={16} className={isSearching ? "text-accent-primary animate-pulse" : "text-text-muted"} />
@@ -63,7 +80,7 @@ export default function SearchVideo({ isHost, onSelect, showQueueButton = true }
               }}
               className="bg-accent-primary hover:bg-accent-secondary text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer shadow-[0_0_15px_rgba(255,42,95,0.3)]"
             >
-              Cambiar Video
+              {resultsPosition === 'relative' ? 'Ir' : 'Cambiar Video'}
             </button>
           )}
         </div>
@@ -81,8 +98,14 @@ export default function SearchVideo({ isHost, onSelect, showQueueButton = true }
 
       {/* Resultados de búsqueda */}
       {results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-bg-elevated/95 backdrop-blur-md border border-border-subtle rounded-xl shadow-2xl z-[60] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="p-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+        <div className={`
+          ${resultsPosition === 'absolute' 
+            ? 'absolute top-full left-0 right-0 mt-2 z-[60] shadow-2xl' 
+            : 'relative mt-2 flex-1 min-h-0'
+          } 
+          bg-bg-elevated/95 backdrop-blur-md border border-border-subtle rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200
+        `}>
+          <div className={`p-2 overflow-y-auto custom-scrollbar ${resultsPosition === 'absolute' ? 'max-h-[300px]' : 'h-full'}`}>
             <p className="text-[10px] font-bold text-text-muted px-2 py-1 uppercase tracking-wider">Resultados / Enlace</p>
             {results.map((video) => (
               <div
@@ -115,10 +138,14 @@ export default function SearchVideo({ isHost, onSelect, showQueueButton = true }
                   <button
                     type="button"
                     onClick={() => handleAddToQueue(video)}
-                    className="self-center p-2 text-text-muted hover:text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-all"
+                    className={`self-center p-2 rounded-lg transition-all ${
+                      addedIds.has(video.id) 
+                        ? 'text-success bg-success/10 scale-110' 
+                        : 'text-text-muted hover:text-accent-primary hover:bg-accent-primary/10'
+                    }`}
                     title="Añadir a la cola"
                   >
-                    <Plus size={18} />
+                    {addedIds.has(video.id) ? <Check size={18} /> : <Plus size={18} />}
                   </button>
                 )}
               </div>
