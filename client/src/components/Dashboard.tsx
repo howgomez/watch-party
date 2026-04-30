@@ -9,8 +9,7 @@ import SearchVideo from './SearhVideo';
 
 /**
  * Panel principal (Dashboard/Lobby).
- * Aquí el usuario puede crear una nueva sala o unirse a una existente
- * usando un código.
+ * Diseño minimalista y profesional.
  */
 export default function Dashboard() {
   const [joinCode, setJoinCode] = useState('');
@@ -24,7 +23,6 @@ export default function Dashboard() {
   const { createRoom, joinRoom, error, clearError } = useRoomStore();
   const router = useRouter();
 
-  // Crear sala y navegar a ella
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsCreating(true);
@@ -37,7 +35,6 @@ export default function Dashboard() {
     }
   };
 
-  // Unirse a una sala existente por código
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsJoining(true);
@@ -51,81 +48,77 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Navbar sencillo */}
-      <nav className="glass border-b border-border-subtle px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-        <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent">
+    <div className="min-h-screen flex flex-col bg-bg-primary font-sans">
+      {/* Navbar Minimalista */}
+      <nav className="border-b border-border-subtle px-6 py-4 flex items-center justify-between bg-bg-primary">
+        <h1 className="text-xl font-bold tracking-tight text-text-primary">
           WatchParty
         </h1>
-        <div className="flex items-center gap-3 sm:gap-4">
-          <span className="text-xs sm:text-sm text-text-secondary">
-            Hola, <span className="text-text-primary font-medium">{user?.username}</span>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-text-secondary">
+            <span className="text-text-primary font-medium">{user?.username}</span>
           </span>
           <button
             onClick={logout}
-            className="text-text-muted hover:text-danger transition-colors cursor-pointer"
+            className="text-text-muted hover:text-text-primary transition-colors cursor-pointer"
             title="Cerrar sesión"
           >
-            <LogOut size={18} />
+            <LogOut size={16} strokeWidth={2} />
           </button>
         </div>
       </nav>
 
       {/* Contenido Principal */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
-        <div className="w-full max-w-2xl space-y-4 sm:space-y-6 animate-fade-in-up">
-          {/* Título central */}
-          <div className="text-center mb-6 sm:mb-10">
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-accent-primary/10 border border-accent-primary/20 text-accent-primary text-xs sm:text-sm font-medium mb-3 sm:mb-4">
-              <Tv size={16} />
-              Listo para la diversión
-            </div>
-            <h2 className="text-2xl sm:text-4xl font-bold text-text-primary">
-              ¿Qué hacemos hoy?
+      <main className="flex-1 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-2xl space-y-8 animate-fade-in-up">
+          
+          <div className="text-center space-y-3">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-text-primary">
+              Bienvenido
             </h2>
-            <p className="text-text-secondary mt-2 text-sm sm:text-base">
-              Crea una sala para ver un video o únete a una existente con un código.
+            <p className="text-text-secondary text-sm sm:text-base">
+              Crea una sala nueva o únete a una existente con un código.
             </p>
           </div>
 
-          {/* Grid de opciones */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Tarjeta: Crear Sala */}
-            <div className="glass rounded-2xl p-4 sm:p-6 hover:border-accent-primary/30 transition-all duration-300 group">
+            <div className="bg-bg-secondary border border-border-subtle rounded-xl p-6 transition-all duration-200 hover:border-border-accent flex flex-col">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl gradient-accent flex items-center justify-center">
-                  <Plus size={20} className="text-white" />
+                <div className="w-8 h-8 rounded-lg bg-bg-elevated flex items-center justify-center border border-border-subtle">
+                  <Plus size={16} className="text-text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-text-primary">Crear Sala</h3>
+                <h3 className="text-base font-semibold text-text-primary">Crear Sala</h3>
               </div>
 
               {!showCreateForm ? (
-                <div>
-                  <p className="text-sm text-text-secondary mb-4">
-                    Sé el host. Elige un video y comparte el código con tus amigos.
+                <div className="flex-1 flex flex-col justify-between">
+                  <p className="text-sm text-text-secondary mb-6">
+                    Inicia una nueva sesión y comparte el enlace con otros.
                   </p>
                   <button
                     onClick={() => setShowCreateForm(true)}
-                    className="w-full gradient-accent text-white font-medium rounded-xl px-4 py-2.5 text-sm hover:opacity-90 transition-opacity cursor-pointer"
+                    className="w-full bg-text-primary text-bg-primary font-medium rounded-lg px-4 py-2.5 text-sm hover:opacity-90 transition-opacity cursor-pointer"
                   >
-                    Empezar
+                    Nueva Sala
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleCreate} className="space-y-3 animate-fade-in-up">
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Nombre de la sala"
-                    required
-                    className="w-full bg-bg-primary/60 border border-border-subtle rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-primary transition-colors"
-                  />
+                <form onSubmit={handleCreate} className="space-y-4 animate-fade-in">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-text-secondary">Nombre de la sala</label>
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Ej: Noche de Pelis"
+                      required
+                      className="w-full bg-bg-primary border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-text-primary transition-colors"
+                    />
+                  </div>
                   
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider px-1">Video Inicial</p>
-                    
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-text-secondary">Video Inicial</label>
                     {!mediaUrl ? (
                       <SearchVideo 
                         isHost={false} 
@@ -133,15 +126,14 @@ export default function Dashboard() {
                         showQueueButton={false} 
                       />
                     ) : (
-                      <div className="flex items-center justify-between bg-accent-primary/10 border border-accent-primary/30 rounded-xl px-4 py-3 animate-fade-in">
+                      <div className="flex items-center justify-between bg-bg-elevated border border-border-subtle rounded-lg px-3 py-2">
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs text-accent-primary font-medium mb-0.5">✓ Video Listo</p>
-                          <p className="text-[10px] text-text-secondary truncate font-mono">{mediaUrl}</p>
+                          <p className="text-xs text-text-primary font-medium truncate">{mediaUrl}</p>
                         </div>
                         <button
                           type="button"
                           onClick={() => setMediaUrl('')}
-                          className="text-text-muted hover:text-danger text-xs px-2 py-1 rounded-lg transition-colors cursor-pointer"
+                          className="ml-2 text-text-muted hover:text-text-primary text-xs transition-colors cursor-pointer"
                         >
                           Cambiar
                         </button>
@@ -152,50 +144,48 @@ export default function Dashboard() {
                   <button
                     type="submit"
                     disabled={isCreating || !mediaUrl || !title.trim()}
-                    className="w-full gradient-accent text-white font-medium rounded-xl px-4 py-2.5 text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full bg-text-primary text-bg-primary font-medium rounded-lg px-4 py-2.5 text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    {isCreating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-                    Crear sala
+                    {isCreating ? <Loader2 size={16} className="animate-spin" /> : 'Crear sala'}
                   </button>
                 </form>
               )}
             </div>
 
             {/* Tarjeta: Unirse */}
-            <div className="glass rounded-2xl p-4 sm:p-6 hover:border-accent-primary/30 transition-all duration-300">
+            <div className="bg-bg-secondary border border-border-subtle rounded-xl p-6 transition-all duration-200 hover:border-border-accent flex flex-col">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-accent-secondary/20 flex items-center justify-center">
-                  <Users size={20} className="text-accent-secondary" />
+                <div className="w-8 h-8 rounded-lg bg-bg-elevated flex items-center justify-center border border-border-subtle">
+                  <Users size={16} className="text-text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-text-primary">Unirse</h3>
+                <h3 className="text-base font-semibold text-text-primary">Unirse</h3>
               </div>
-              <p className="text-sm text-text-secondary mb-4">
-                ¿Te pasaron un código? Ingresá a la sala de tu amigo.
+              <p className="text-sm text-text-secondary mb-6 flex-1">
+                Ingresa el código de una sala existente para participar.
               </p>
               <form onSubmit={handleJoin} className="flex gap-2">
                 <input
                   type="text"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  placeholder="Código (ej: A1B2C3)"
+                  placeholder="Código"
                   required
                   maxLength={6}
-                  className="flex-1 bg-bg-primary/60 border border-border-subtle rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-primary transition-colors uppercase tracking-widest text-center font-mono"
+                  className="flex-1 bg-bg-primary border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-text-primary transition-colors uppercase font-mono tracking-wider"
                 />
                 <button
                   type="submit"
                   disabled={isJoining || joinCode.length < 4}
-                  className="gradient-accent text-white rounded-xl px-4 py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
+                  className="bg-bg-elevated border border-border-subtle text-text-primary rounded-lg px-4 py-2 hover:bg-border-subtle transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  {isJoining ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
+                  {isJoining ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
                 </button>
               </form>
             </div>
           </div>
 
-          {/* Error global */}
           {error && (
-            <div className="bg-danger/10 border border-danger/20 rounded-xl px-4 py-3 text-sm text-danger text-center animate-fade-in-up">
+            <div className="bg-danger/10 border border-danger/20 rounded-lg px-4 py-3 text-sm text-danger text-center animate-fade-in">
               {error}
             </div>
           )}

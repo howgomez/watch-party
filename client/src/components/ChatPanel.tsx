@@ -8,20 +8,17 @@ import type { Message } from '@/lib/types';
 import { Send, Info, MessageSquare } from 'lucide-react';
 
 interface ChatPanelProps {
-  roomId: string; // ID real (UUID) de la sala para las consultas REST y socket
+  roomId: string;
 }
 
-// Extendemos Message para soportar mensajes "falsos" del sistema
 type ChatItem = Message & { isSystem?: boolean; systemContent?: string };
 
-// Paleta de colores vibrantes estilo Twitch
 const USER_COLORS = [
   'text-rose-400', 'text-blue-400', 'text-green-400',
   'text-yellow-400', 'text-purple-400', 'text-orange-400',
   'text-cyan-400', 'text-pink-400', 'text-emerald-400'
 ];
 
-// Genera un color consistente para el mismo usuario basado en su ID o nombre
 const getUserColor = (username: string) => {
   let hash = 0;
   for (let i = 0; i < username.length; i++) {
@@ -32,7 +29,7 @@ const getUserColor = (username: string) => {
 
 /**
  * Panel de chat en vivo interactivo.
- * Soporta historial, auto-scroll, notificaciones de sistema y colores dinámicos.
+ * Diseño minimalista y profesional.
  */
 export default function ChatPanel({ roomId }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatItem[]>([]);
@@ -41,12 +38,10 @@ export default function ChatPanel({ roomId }: ChatPanelProps) {
   const { user } = useAuthStore();
   const socket = getSocket();
 
-  // Auto-scroll al último mensaje
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Cargar historial de mensajes al montar
   useEffect(() => {
     const loadMessages = async () => {
       try {
@@ -59,16 +54,13 @@ export default function ChatPanel({ roomId }: ChatPanelProps) {
     loadMessages();
   }, [roomId]);
 
-  // Escuchar mensajes y alertas del sistema
   useEffect(() => {
     if (!socket) return;
 
-    // Mensaje normal de usuario
     const handleNewMessage = (data: { event: string; data: Message }) => {
       setMessages((prev) => [...prev, data.data]);
     };
 
-    // Alerta especial del sistema
     const handleSystemAlert = (data: { content: string }) => {
       const systemMsg: ChatItem = {
         id: `sys-${Date.now()}-${Math.random()}`,
@@ -109,31 +101,30 @@ export default function ChatPanel({ roomId }: ChatPanelProps) {
   };
 
   return (
-    <div className="glass rounded-2xl flex flex-col h-full overflow-hidden">
+    <div className="bg-bg-secondary border border-border-subtle rounded-xl flex flex-col h-full overflow-hidden">
       {/* Encabezado del chat */}
-      <div className="px-4 py-3 border-b border-border-subtle bg-white/5">
-        <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-          <MessageSquare size={16} className="text-accent-primary" />
-          Chat en Vivo
+      <div className="px-4 py-3 border-b border-border-subtle bg-bg-secondary flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+          <MessageSquare size={16} className="text-text-secondary" />
+          Chat
         </h3>
       </div>
 
       {/* Lista de mensajes */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 custom-scrollbar bg-bg-primary/30">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center opacity-40 gap-3">
-            <MessageSquare size={40} />
-            <p className="text-xs font-medium">¡Sé el primero en saludar!</p>
+            <MessageSquare size={32} />
+            <p className="text-sm">No hay mensajes aún.</p>
           </div>
         )}
 
         {messages.map((msg) => {
-          // Si es un mensaje del sistema, lo renderizamos distinto
           if (msg.isSystem) {
             return (
               <div key={msg.id} className="flex justify-center animate-fade-in-up my-2">
-                <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/5">
-                  <Info size={12} className="text-accent-primary" />
+                <div className="bg-bg-elevated px-3 py-1.5 rounded-lg flex items-center gap-2 border border-border-subtle">
+                  <Info size={12} className="text-text-secondary" />
                   <span className="text-[11px] font-medium text-text-secondary">
                     {msg.systemContent}
                   </span>
@@ -148,22 +139,22 @@ export default function ChatPanel({ roomId }: ChatPanelProps) {
           return (
             <div
               key={msg.id}
-              className={`animate-in fade-in slide-in-from-bottom-2 flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}
+              className={`animate-in fade-in flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}
             >
               {!isOwn && (
-                <span className={`text-[11px] font-bold mb-1 ml-1 ${userColor}`}>
+                <span className={`text-[11px] font-semibold mb-1 ml-1 ${userColor}`}>
                   {msg.user.username}
                 </span>
               )}
               <div
-                className={`max-w-[85%] rounded-2xl px-3.5 py-2 ${isOwn
-                    ? 'bg-accent-primary text-white rounded-br-sm shadow-lg shadow-accent-primary/20'
+                className={`max-w-[85%] rounded-lg px-3 py-2 ${isOwn
+                    ? 'bg-text-primary text-bg-primary rounded-br-sm'
                     : 'bg-bg-elevated border border-border-subtle text-text-primary rounded-bl-sm'
                   }`}
               >
-                <p className="text-[13px] leading-relaxed break-words">{msg.content}</p>
+                <p className="text-sm leading-relaxed break-words">{msg.content}</p>
               </div>
-              <span className="text-[9px] text-text-muted mt-1 font-mono tracking-wider px-1">
+              <span className="text-[10px] text-text-muted mt-1 px-1">
                 {new Date(msg.created_at).toLocaleTimeString('es', {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -176,19 +167,19 @@ export default function ChatPanel({ roomId }: ChatPanelProps) {
       </div>
 
       {/* Input de mensaje */}
-      <form onSubmit={handleSend} className="p-3 border-t border-border-subtle bg-black/20 flex gap-2">
+      <form onSubmit={handleSend} className="p-3 border-t border-border-subtle bg-bg-secondary flex gap-2">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Escribe un mensaje..."
+          placeholder="Mensaje..."
           maxLength={500}
-          className="flex-1 bg-white/5 border border-transparent rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:bg-white/10 focus:border-accent-primary/50 transition-all"
+          className="flex-1 bg-bg-primary border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-text-primary transition-colors"
         />
         <button
           type="submit"
           disabled={!input.trim()}
-          className="bg-accent-primary text-white rounded-xl px-4 py-2.5 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center shadow-lg shadow-accent-primary/20"
+          className="bg-text-primary text-bg-primary rounded-lg px-4 py-2 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
         >
           <Send size={16} />
         </button>

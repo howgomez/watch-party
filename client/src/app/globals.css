@@ -1,36 +1,36 @@
 @import "tailwindcss";
 
 /* ============================
-   Sistema de Diseño - WatchParty
-   Paleta: Dark Mode Premium con acentos púrpura/azul
+   Sistema de Diseño - Minimalista & Profesional
+   Paleta: Dark Mode Neutral (SaaS Style)
    ============================ */
 
 :root {
   /* Fondos */
-  --bg-primary: #0B0B0F;
-  --bg-secondary: #13131A;
-  --bg-elevated: #1A1A24;
-  --bg-glass: rgba(26, 26, 36, 0.6);
+  --bg-primary: #09090b; /* Zinc 950 */
+  --bg-secondary: #18181b; /* Zinc 900 */
+  --bg-elevated: #27272a; /* Zinc 800 */
+  --bg-glass: rgba(24, 24, 27, 0.7);
 
   /* Textos */
-  --text-primary: #F0F0F5;
-  --text-secondary: #8B8B9E;
-  --text-muted: #55556A;
+  --text-primary: #fafafa; /* Zinc 50 */
+  --text-secondary: #a1a1aa; /* Zinc 400 */
+  --text-muted: #71717a; /* Zinc 500 */
 
   /* Acentos */
-  --accent-primary: #7C5CFC;
-  --accent-secondary: #5B8DEF;
-  --accent-gradient: linear-gradient(135deg, #7C5CFC 0%, #5B8DEF 100%);
-  --accent-glow: rgba(124, 92, 252, 0.25);
+  --accent-primary: #ffffff; /* Blanco puro para acentos elegantes */
+  --accent-secondary: #e4e4e7; /* Zinc 200 */
+  --accent-gradient: #ffffff; /* Eliminamos gradientes */
+  --accent-glow: transparent;
 
   /* Bordes */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-accent: rgba(124, 92, 252, 0.3);
+  --border-subtle: #27272a; /* Zinc 800 */
+  --border-accent: #52525b; /* Zinc 600 */
 
   /* Estados */
-  --success: #34D399;
-  --danger: #EF4444;
-  --warning: #FBBF24;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
 }
 
 @theme inline {
@@ -78,29 +78,26 @@ body {
    Utilidades Reutilizables
    ============================ */
 
-/* Efecto de cristal translúcido (Glassmorphism) */
+/* Efecto de panel sutil (en lugar de glass pesado) */
 .glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* Resplandor sutil en púrpura detrás de elementos "flotantes" */
 .glow {
-  box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(124, 92, 252, 0.08);
+  box-shadow: none;
 }
 
-/* Gradiente animado para botones o fondos de acento */
 .gradient-accent {
-  background: var(--accent-gradient);
+  background: var(--accent-primary);
+  color: var(--bg-primary);
 }
 
-/* Animación de entrada suave desde abajo */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -109,16 +106,15 @@ body {
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.4s ease-out forwards;
+  animation: fadeInUp 0.3s ease-out forwards;
 }
 
-/* Animación de pulso suave para indicadores "en vivo" */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(124, 92, 252, 0.4);
+    opacity: 1;
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(124, 92, 252, 0);
+    opacity: 0.5;
   }
 }
 
@@ -126,20 +122,19 @@ body {
   animation: pulse-glow 2s infinite;
 }
 
-/* Animaciones adicionales para buscador */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.2s ease-out forwards;
 }
 
 @keyframes slideInFromTop {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;

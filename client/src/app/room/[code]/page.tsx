@@ -132,14 +132,14 @@ export default function RoomPage() {
       {/* ============================================= */}
       {/* BARRA SUPERIOR - Responsiva para móvil        */}
       {/* ============================================= */}
-      <nav className="glass border-b border-border-subtle px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between shrink-0 gap-2 z-50">
+      <nav className="border-b border-border-subtle bg-bg-secondary px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between shrink-0 gap-2 z-50">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={handleLeave}
-            className="text-text-muted hover:text-text-primary transition-colors cursor-pointer shrink-0"
+            className="text-text-muted hover:text-text-primary transition-colors cursor-pointer shrink-0 p-1.5 rounded-lg hover:bg-bg-elevated"
             title="Volver al lobby"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </button>
           <div className="min-w-0">
             <h1 className="text-xs sm:text-sm font-semibold text-text-primary flex items-center gap-2 truncate">
@@ -189,11 +189,18 @@ export default function RoomPage() {
       {/* Desktop: Video (izq) + Chat (der) lado a lado */}
       {/* Móvil: Video (arriba) + Tabs (abajo)          */}
       {/* ============================================= */}
-      <main className="flex-1 flex flex-col lg:flex-row gap-3 sm:gap-4 p-2 sm:p-4 min-h-0 overflow-hidden relative">
+      <main className="flex-1 flex flex-col lg:flex-row gap-3 sm:gap-4 p-2 sm:p-4 min-h-0 overflow-hidden">
         
-        {/* ---- SECCIÓN VIDEO (Siempre visible en la parte superior en móvil) ---- */}
-        <div className="flex flex-col lg:flex-1 gap-3 sm:gap-4 min-w-0 min-h-0 shrink-0 lg:shrink">
-          <div className="shrink-0 lg:flex-1 min-h-0 max-h-[35vh] lg:max-h-none">
+        {/* ---- SECCIÓN VIDEO ---- */}
+        <div className="flex flex-col lg:flex-1 gap-2 min-w-0 min-h-0 shrink-0 lg:shrink overflow-y-auto">
+
+          {/* Buscador ENCIMA del video (solo desktop) */}
+          <div className="hidden lg:block relative shrink-0">
+            <SearchVideo isHost={isHost} />
+          </div>
+
+          {/* Video Player — max-h capped para que siempre queden visibles los controles */}
+          <div className="shrink-0 max-h-[35vh] lg:max-h-[65vh]">
             <VideoPlayer
               url={currentRoom.media_url}
               roomId={currentRoom.id}
@@ -202,16 +209,13 @@ export default function RoomPage() {
             />
           </div>
 
-          {/* En Escritorio: Búsqueda e Info debajo del video */}
-          <div className="hidden lg:flex flex-col gap-4 overflow-y-auto pr-1">
-            <SearchVideo isHost={isHost} />
-            
-            {/* Lista de participantes Desktop */}
-            <div className="glass rounded-xl p-3 flex items-center gap-3 shrink-0">
-              <span className="text-xs text-text-muted whitespace-nowrap">En la sala:</span>
+          {/* Participantes debajo del video (solo desktop) */}
+          <div className="hidden lg:block shrink-0">
+            <div className="bg-bg-secondary border border-border-subtle rounded-xl p-3 flex items-center gap-3">
+              <span className="text-xs font-medium text-text-muted whitespace-nowrap">En la sala:</span>
               <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning whitespace-nowrap">
-                  <Crown size={10} />
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle text-xs text-text-primary font-medium whitespace-nowrap">
+                  <Crown size={12} className="text-warning" />
                   {currentRoom.host.username}
                 </div>
                 {currentRoom.participants?.map((p) => (
@@ -219,7 +223,7 @@ export default function RoomPage() {
                     key={p.user.id}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-elevated border border-border-subtle text-xs text-text-secondary whitespace-nowrap"
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-glow" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-success" />
                     {p.user.username}
                   </div>
                 ))}
@@ -229,15 +233,15 @@ export default function RoomPage() {
         </div>
 
         {/* ---- SECCIÓN INTERACCIÓN (Pestañas en móvil, Sidebar en escritorio) ---- */}
-        <div className="lg:w-80 flex flex-col min-h-0 flex-1 lg:flex-none gap-2 sm:gap-3 bg-bg-elevated/20 lg:bg-transparent rounded-2xl p-1 lg:p-0">
+        <div className="lg:w-80 flex flex-col min-h-0 flex-1 lg:flex-none gap-2 sm:gap-3 bg-bg-primary rounded-xl p-1 lg:p-0">
           
           {/* Tab Switcher mejorado */}
-          <div className="flex bg-bg-elevated/50 p-1 rounded-xl border border-border-subtle shrink-0 shadow-inner">
+          <div className="flex bg-bg-secondary p-1 rounded-xl border border-border-subtle shrink-0">
             <button
               onClick={() => setActiveTab('chat')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${activeTab === 'chat'
-                ? 'bg-accent-primary text-white shadow-lg shadow-accent-primary/20 scale-[1.02]'
-                : 'text-text-muted hover:text-text-primary'
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${activeTab === 'chat'
+                ? 'bg-bg-elevated text-text-primary shadow-sm border border-border-subtle'
+                : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated/50'
                 }`}
             >
               <MessageSquare size={14} />
@@ -245,15 +249,15 @@ export default function RoomPage() {
             </button>
             <button
               onClick={() => setActiveTab('queue')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all relative ${activeTab === 'queue'
-                ? 'bg-accent-primary text-white shadow-lg shadow-accent-primary/20 scale-[1.02]'
-                : 'text-text-muted hover:text-text-primary'
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all relative ${activeTab === 'queue'
+                ? 'bg-bg-elevated text-text-primary shadow-sm border border-border-subtle'
+                : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated/50'
                 }`}
             >
               <ListMusic size={14} />
               COLA
               {currentRoom.queue && currentRoom.queue.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-error text-[8px] flex items-center justify-center rounded-full border-2 border-bg-primary">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-text-primary text-bg-primary text-[9px] flex items-center justify-center rounded-full font-bold">
                   {currentRoom.queue.length}
                 </span>
               )}
@@ -262,9 +266,9 @@ export default function RoomPage() {
             {/* Pestañas adicionales para Móvil */}
             <button
               onClick={() => setActiveTab('search')}
-              className={`lg:hidden flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${activeTab === 'search'
-                ? 'bg-accent-primary text-white shadow-lg'
-                : 'text-text-muted hover:text-text-primary'
+              className={`lg:hidden flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${activeTab === 'search'
+                ? 'bg-bg-elevated text-text-primary shadow-sm border border-border-subtle'
+                : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated/50'
                 }`}
             >
               <Monitor size={14} />
@@ -272,9 +276,9 @@ export default function RoomPage() {
             </button>
             <button
               onClick={() => setActiveTab('info')}
-              className={`lg:hidden flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${activeTab === 'info'
-                ? 'bg-accent-primary text-white shadow-lg'
-                : 'text-text-muted hover:text-text-primary'
+              className={`lg:hidden flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${activeTab === 'info'
+                ? 'bg-bg-elevated text-text-primary shadow-sm border border-border-subtle'
+                : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated/50'
                 }`}
             >
               <Users size={14} />
@@ -293,27 +297,27 @@ export default function RoomPage() {
               />
             )}
             {activeTab === 'search' && (
-              <div className="flex-1 min-h-0 p-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="flex-1 min-h-0 p-1 animate-in fade-in duration-200">
                 <SearchVideo isHost={isHost} resultsPosition="relative" />
               </div>
             )}
             {activeTab === 'info' && (
-              <div className="flex flex-col gap-3 p-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="glass rounded-xl p-4">
-                  <h3 className="text-xs font-bold text-accent-primary uppercase tracking-widest mb-3">Participantes</h3>
+              <div className="flex flex-col gap-3 p-3 animate-in fade-in duration-200">
+                <div className="bg-bg-secondary border border-border-subtle rounded-xl p-4">
+                  <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-4">Participantes</h3>
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between p-2 rounded-lg bg-warning/5 border border-warning/10">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between p-2.5 rounded-lg bg-bg-elevated border border-border-subtle">
+                      <div className="flex items-center gap-2.5">
                         <Crown size={14} className="text-warning" />
                         <span className="text-sm font-medium text-text-primary">{currentRoom.host.username}</span>
                       </div>
-                      <span className="text-[10px] font-bold text-warning uppercase">Host</span>
+                      <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Host</span>
                     </div>
                     {currentRoom.participants?.map((p) => (
-                      <div key={p.user.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
-                        <div className="flex items-center gap-2">
+                      <div key={p.user.id} className="flex items-center justify-between p-2.5 rounded-lg border border-transparent hover:bg-bg-elevated transition-colors">
+                        <div className="flex items-center gap-2.5">
                           <div className="w-2 h-2 rounded-full bg-success" />
-                          <span className="text-sm text-text-secondary">{p.user.username}</span>
+                          <span className="text-sm font-medium text-text-secondary">{p.user.username}</span>
                         </div>
                       </div>
                     ))}

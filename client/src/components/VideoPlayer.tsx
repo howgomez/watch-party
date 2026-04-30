@@ -395,7 +395,7 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
   return (
     <div
       ref={wrapperRef}
-      className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black glow group flex flex-col"
+      className="relative w-full aspect-video rounded-xl overflow-hidden bg-black group flex flex-col border border-border-subtle"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
     >
@@ -484,9 +484,9 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
             }
           }}
         >
-          <div className="bg-accent-primary text-white px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 glow animate-pulse hover:scale-105 transition-transform">
-            <Play size={26} fill="currentColor" />
-            Haz clic aquí para unirte a la sala
+          <div className="bg-text-primary text-bg-primary px-6 py-3 rounded-lg font-bold text-base flex items-center gap-3 shadow-lg hover:scale-105 transition-transform">
+            <Play size={22} fill="currentColor" />
+            Haz clic para unirte
           </div>
         </div>
       )}
@@ -498,9 +498,9 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
           className="absolute inset-0 z-30 flex items-center justify-center bg-black/30 cursor-pointer backdrop-blur-[2px]"
           onClick={handleFirstInteraction}
         >
-          <div className="bg-accent-primary/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 glow animate-bounce shadow-2xl">
-            <Play size={20} />
-            Haz clic aquí para sincronizar
+          <div className="bg-text-primary text-bg-primary px-6 py-3 rounded-lg font-semibold flex items-center gap-2 animate-bounce shadow-xl">
+            <Play size={20} fill="currentColor" />
+            Haz clic para sincronizar
           </div>
         </div>
       )}
@@ -509,7 +509,7 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
       {!isTwitch && !isHost && hasInteracted && (
         <button
           onClick={handleManualSync}
-          className="absolute top-3 right-3 z-20 bg-black/60 hover:bg-accent-primary/80 text-white/80 hover:text-white p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 flex items-center gap-1.5 text-xs"
+          className="absolute top-3 right-3 z-20 bg-black/60 hover:bg-white hover:text-black text-white/80 p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 flex items-center gap-1.5 text-xs font-medium"
           title="Re-sincronizar con el host"
         >
           <RefreshCw size={14} />
@@ -524,7 +524,7 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
           style={{ opacity: showControls || !isPlaying ? 1 : 0 }}
         >
           {/* Progress Bar */}
-          <input
+            <input
             type="range"
             min={0} max={duration || 100} step="any"
             value={playedSeconds}
@@ -534,12 +534,12 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
             onTouchStart={handleSeekMouseDown}
             onTouchEnd={handleSeekMouseUp as any}
             disabled={!isHost}
-            className={`w-full h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-0
+            className={`w-full h-1 bg-white/30 rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-0
       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-      [&::-webkit-slider-thumb]:bg-accent-primary [&::-webkit-slider-thumb]:rounded-full
+      [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full
       ${!isHost ? 'opacity-70 cursor-not-allowed' : ''}`}
             style={{
-              background: `linear-gradient(to right, var(--accent-primary) ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`
+              background: `linear-gradient(to right, white ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`
             }}
           />
 
@@ -549,14 +549,14 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
               <button
                 onClick={togglePlay}
                 disabled={!isHost}
-                className={`text-white hover:text-accent-primary transition-colors ${!isHost ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`text-white/80 hover:text-white transition-colors ${!isHost ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
               </button>
 
               {/* Volume - Oculto en móvil para ahorrar espacio, visible en sm+ */}
               <div className="hidden sm:flex items-center gap-2 group">
-                <button onClick={toggleMute} className="text-white hover:text-accent-primary transition-colors">
+                <button onClick={toggleMute} className="text-white/80 hover:text-white transition-colors">
                   {muted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </button>
                 <input
@@ -574,7 +574,7 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
               </div>
 
               {/* Volume icon only on mobile */}
-              <button onClick={toggleMute} className="sm:hidden text-white hover:text-accent-primary transition-colors">
+              <button onClick={toggleMute} className="sm:hidden text-white/80 hover:text-white transition-colors">
                 {muted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
               </button>
 
@@ -585,7 +585,7 @@ export default function VideoPlayer({ url, roomId, isHost, socketReady }: VideoP
             </div>
 
             {/* Fullscreen */}
-            <button onClick={toggleFullscreen} className="text-white hover:text-accent-primary transition-colors">
+            <button onClick={toggleFullscreen} className="text-white/80 hover:text-white transition-colors">
               {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
             </button>
           </div>

@@ -36,4 +36,4 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 3001
 
 # El comando maestro que se ejecutará cuando encendamos el contenedor
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["sh", "-c", "npx prisma@6.19.3 migrate deploy && node dist/main.js"]

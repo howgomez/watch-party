@@ -1,21 +1,16 @@
 import { Plus, Search, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getSocket } from '@/lib/socket';
 import { useRoomStore } from '@/stores/room-store';
 import { useVideoSearch } from '@/hooks/useVideoSearch';
 
 interface SearchVideoProps {
   isHost: boolean;
-  onSelect?: (url: string) => void; // Para cuando se usa en "Crear Sala"
+  onSelect?: (url: string) => void;
   showQueueButton?: boolean;
-  resultsPosition?: 'absolute' | 'relative'; // Nueva prop
+  resultsPosition?: 'absolute' | 'relative';
 }
 
-/**
- * Componente de búsqueda de videos.
- * Utiliza el hook useVideoSearch para manejar la lógica.
- * Puede ser usado en la sala para cambiar el video o en la creación de sala.
- */
 export default function SearchVideo({ 
   isHost, 
   onSelect, 
@@ -25,6 +20,28 @@ export default function SearchVideo({
   const { query, results, isSearching, search, clearSearch } = useVideoSearch();
   const currentRoom = useRoomStore((state) => state.currentRoom);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Reset the 5-second inactivity timer whenever the user interacts
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    if (results.length > 0) {
+      inactivityTimer.current = setTimeout(() => {
+        clearSearch();
+      }, 5000);
+    }
+  }, [results.length, clearSearch]);
+
+  // Start timer when results appear
+  useEffect(() => {
+    if (results.length > 0) {
+      resetInactivityTimer();
+    }
+    return () => {
+      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    };
+  }, [results.length, resetInactivityTimer]);
 
   const handleSelect = (url: string) => {
     if (onSelect) {
@@ -39,7 +56,6 @@ export default function SearchVideo({
     if (currentRoom) {
       getSocket()?.emit('queue:add', { roomId: currentRoom.id, video });
       
-      // Feedback visual
       setAddedIds(prev => new Set(prev).add(video.id));
       setTimeout(() => {
         setAddedIds(prev => {
@@ -52,21 +68,27 @@ export default function SearchVideo({
   };
 
   return (
-    <div className={`relative group w-full ${resultsPosition === 'relative' ? 'flex flex-col min-h-0' : ''}`}>
-      <div className={`glass rounded-xl p-2 flex flex-col gap-2 relative z-50 shrink-0`}>
+    <div
+      ref={containerRef}
+      className={`relative w-full ${resultsPosition === 'relative' ? 'flex flex-col min-h-0' : ''}`}
+      onMouseMove={resetInactivityTimer}
+      onClick={resetInactivityTimer}
+    >
+      <div className="bg-bg-secondary border border-border-subtle rounded-xl p-2 flex flex-col gap-2 shrink-0">
         <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-2 bg-black/20 rounded-lg px-3 py-2 border border-border-subtle focus-within:border-accent-primary/50 transition-colors">
-            <Search size={16} className={isSearching ? "text-accent-primary animate-pulse" : "text-text-muted"} />
+          <div className="flex-1 flex items-center gap-2 bg-bg-primary rounded-lg px-3 py-2 border border-border-subtle focus-within:border-text-primary transition-colors">
+            <Search size={16} className={isSearching ? "text-text-primary animate-pulse" : "text-text-muted"} />
             <input
               type="text"
               value={query}
-              onChange={(e) => search(e.target.value)}
+              onChange={(e) => { search(e.target.value); resetInactivityTimer(); }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  e.preventDefault(); // Prevenir submit del form padre
+                  e.preventDefault();
                   if (query.trim()) handleSelect(query.trim());
                 }
               }}
+              onFocus={resetInactivityTimer}
               placeholder="Busca o pega un enlace (Twitch, MP4, etc)..."
               className="bg-transparent border-none outline-none text-sm text-text-primary w-full placeholder:text-text-muted"
               autoComplete="off"
@@ -78,39 +100,41 @@ export default function SearchVideo({
               onClick={() => {
                 if (query.trim()) handleSelect(query.trim());
               }}
-              className="bg-accent-primary hover:bg-accent-secondary text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer shadow-[0_0_15px_rgba(255,42,95,0.3)]"
+              className="bg-text-primary hover:opacity-90 text-bg-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer shadow-sm"
             >
               {resultsPosition === 'relative' ? 'Ir' : 'Cambiar Video'}
             </button>
           )}
         </div>
         
-        {/* Ejemplos de links para educar al usuario */}
         <div className="flex items-center gap-2 sm:gap-3 px-2 opacity-60 overflow-x-auto">
           <span className="text-[8px] sm:text-[9px] font-medium text-text-muted uppercase tracking-wider shrink-0">Soporta:</span>
           <div className="flex gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] text-text-secondary font-mono">
-            <span className="bg-white/5 px-1.5 py-0.5 rounded border border-white/5 whitespace-nowrap">youtube.com/...</span>
-            <span className="bg-white/5 px-1.5 py-0.5 rounded border border-white/5 whitespace-nowrap">twitch.tv/...</span>
-            <span className="bg-white/5 px-1.5 py-0.5 rounded border border-white/5 whitespace-nowrap">.../video.mp4</span>
+            <span className="bg-bg-elevated px-1.5 py-0.5 rounded border border-border-subtle whitespace-nowrap">youtube.com/...</span>
+            <span className="bg-bg-elevated px-1.5 py-0.5 rounded border border-border-subtle whitespace-nowrap">twitch.tv/...</span>
+            <span className="bg-bg-elevated px-1.5 py-0.5 rounded border border-border-subtle whitespace-nowrap">.../video.mp4</span>
           </div>
         </div>
       </div>
 
-      {/* Resultados de búsqueda */}
+      {/* Resultados de búsqueda — se auto-cierran a los 5s sin interacción */}
       {results.length > 0 && (
-        <div className={`
-          ${resultsPosition === 'absolute' 
-            ? 'absolute top-full left-0 right-0 mt-2 z-[60] shadow-2xl' 
-            : 'relative mt-2 flex-1 min-h-0'
-          } 
-          bg-bg-elevated/95 backdrop-blur-md border border-border-subtle rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200
-        `}>
+        <div
+          className={`
+            ${resultsPosition === 'absolute' 
+              ? 'absolute top-full left-0 right-0 mt-1 z-50 shadow-xl' 
+              : 'relative mt-2 flex-1 min-h-0'
+            } 
+            bg-bg-secondary border border-border-subtle rounded-xl overflow-hidden animate-fade-in
+          `}
+          onMouseMove={resetInactivityTimer}
+        >
           <div className={`p-2 overflow-y-auto custom-scrollbar ${resultsPosition === 'absolute' ? 'max-h-[300px]' : 'h-full'}`}>
             <p className="text-[10px] font-bold text-text-muted px-2 py-1 uppercase tracking-wider">Resultados / Enlace</p>
             {results.map((video) => (
               <div
                 key={video.id}
-                className="w-full flex gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors group/item"
+                className="w-full flex gap-3 p-2 hover:bg-bg-elevated rounded-lg transition-colors group/item"
               >
                 <button
                   type="button"
@@ -124,7 +148,7 @@ export default function SearchVideo({
                     </span>
                   </div>
                   <div className="flex-1 min-w-0 py-0.5">
-                    <h4 className="text-xs font-medium text-text-primary truncate group-hover/item:text-accent-primary transition-colors">
+                    <h4 className="text-xs font-medium text-text-primary truncate group-hover/item:text-text-secondary transition-colors">
                       {video.title}
                     </h4>
                     <p className="text-[10px] text-text-muted mt-1 truncate">
@@ -133,15 +157,14 @@ export default function SearchVideo({
                   </div>
                 </button>
 
-                {/* Botón de añadir a cola */}
                 {currentRoom && showQueueButton && (
                   <button
                     type="button"
-                    onClick={() => handleAddToQueue(video)}
+                    onClick={() => { handleAddToQueue(video); resetInactivityTimer(); }}
                     className={`self-center p-2 rounded-lg transition-all ${
                       addedIds.has(video.id) 
                         ? 'text-success bg-success/10 scale-110' 
-                        : 'text-text-muted hover:text-accent-primary hover:bg-accent-primary/10'
+                        : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated'
                     }`}
                     title="Añadir a la cola"
                   >

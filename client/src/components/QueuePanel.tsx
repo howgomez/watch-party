@@ -29,13 +29,13 @@ export default function QueuePanel({ queue, roomId, isHost }: QueuePanelProps) {
   };
 
   return (
-    <div className="flex flex-col h-full glass rounded-2xl overflow-hidden border border-border-subtle animate-fade-in">
-      <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-white/5">
-        <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-          <ListMusic size={18} className="text-accent-primary" />
+    <div className="flex flex-col h-full bg-bg-secondary rounded-xl overflow-hidden border border-border-subtle animate-fade-in">
+      <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-bg-secondary">
+        <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+          <ListMusic size={16} className="text-text-secondary" />
           Cola de Reproducción
         </h3>
-        <span className="text-[10px] bg-accent-primary/20 text-accent-primary px-2 py-0.5 rounded-full font-bold">
+        <span className="text-[10px] bg-bg-elevated text-text-primary px-2 py-1 rounded-md font-medium border border-border-subtle">
           {queue.length} VIDEOS
         </span>
       </div>
@@ -50,10 +50,10 @@ export default function QueuePanel({ queue, roomId, isHost }: QueuePanelProps) {
           queue.map((item) => (
             <div 
               key={item.id} 
-              className="group relative flex gap-3 p-2 rounded-xl bg-white/5 border border-transparent hover:border-accent-primary/30 hover:bg-white/10 transition-all duration-300 animate-in slide-in-from-right-2"
+              className="group relative flex gap-3 p-2 rounded-lg bg-bg-primary border border-border-subtle hover:border-text-primary/30 transition-all duration-200 animate-in fade-in"
             >
               {/* Thumbnail Mini */}
-              <div className="relative shrink-0 w-24 aspect-video rounded-lg overflow-hidden bg-black shadow-lg">
+              <div className="relative shrink-0 w-24 aspect-video rounded-md overflow-hidden bg-bg-elevated">
                 {item.thumbnail ? (
                   <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" />
                 ) : (
@@ -69,7 +69,7 @@ export default function QueuePanel({ queue, roomId, isHost }: QueuePanelProps) {
                 {isHost && (
                   <button 
                     onClick={() => handlePlayNow(item.url, item.id)}
-                    className="absolute inset-0 bg-accent-primary/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Play size={20} fill="white" className="text-white" />
                   </button>
@@ -78,7 +78,7 @@ export default function QueuePanel({ queue, roomId, isHost }: QueuePanelProps) {
 
               {/* Info */}
               <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <h4 className="text-[11px] font-semibold text-text-primary truncate leading-tight group-hover:text-accent-primary transition-colors">
+                <h4 className="text-xs font-medium text-text-primary truncate leading-tight group-hover:text-text-secondary transition-colors">
                   {item.title}
                 </h4>
                 <div className="flex items-center gap-1.5 mt-1">
@@ -104,8 +104,8 @@ export default function QueuePanel({ queue, roomId, isHost }: QueuePanelProps) {
         )}
       </div>
 
-      <div className="p-3 bg-white/5 border-t border-border-subtle">
-        <p className="text-[9px] text-text-muted text-center italic">
+      <div className="p-3 bg-bg-secondary border-t border-border-subtle">
+        <p className="text-[10px] text-text-muted text-center">
           {isHost 
             ? "Como Host, puedes gestionar y saltar videos." 
             : "Busca videos y añádelos a la cola para verlos después."}
