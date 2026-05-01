@@ -28,7 +28,7 @@ export interface AuthenticatedSocket extends Socket {
   cors: {
     origin: [
       'http://localhost:3000',
-      'https://watch-party-self.vercel.app/',
+      'https://watch-party-self.vercel.app',
       /\.vercel\.app$/,
     ],
   },

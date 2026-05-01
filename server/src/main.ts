@@ -8,7 +8,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000',                    // desarrollo
-      'https://watch-party-self.vercel.app/',               // producción
+      'https://watch-party-self.vercel.app',               // producción
       /\.vercel\.app$/,                          // preview deployments
     ],
     credentials: true
