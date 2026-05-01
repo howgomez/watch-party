@@ -26,7 +26,11 @@ export interface AuthenticatedSocket extends Socket {
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3001",
+    origin: [
+      'http://localhost:3000',
+      'https://watch-party-self.vercel.app/',
+      /\.vercel\.app$/,
+    ],
   },
 })
 export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
