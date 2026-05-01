@@ -15,4 +15,3 @@ import { YoutubeModule } from './youtube/youtube.module';
   providers: []
 })
 export class AppModule { }
-// Triggering reload manually...

@@ -1,10 +1,11 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/stores/auth-store';
+
 import AuthForm from '@/components/AuthForm';
 import Dashboard from '@/components/Dashboard';
-import { Loader2 } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth-store';
 
 /**
  * Página principal.

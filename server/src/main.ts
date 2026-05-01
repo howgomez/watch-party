@@ -6,11 +6,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'http://localhost:3000', // Permitir solo tu frontend
-    credentials: true, // Importante para cookies/auth
+    origin: process.env.CLIENT_URL || "http://localhost:3001",
+    credentials: true
   });
   app.setGlobalPrefix("api")
-  // Validation
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

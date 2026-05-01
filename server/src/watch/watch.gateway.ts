@@ -26,7 +26,7 @@ export interface AuthenticatedSocket extends Socket {
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: process.env.CLIENT_URL || "http://localhost:3001",
   },
 })
 export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
