@@ -6,7 +6,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: process.env.CLIENT_URL || "http://localhost:3001",
+    origin: [
+      'http://localhost:3000',                    // desarrollo
+      'https://watch-party-self.vercel.app/',               // producción
+      /\.vercel\.app$/,                          // preview deployments
+    ],
     credentials: true
   });
   app.setGlobalPrefix("api")
