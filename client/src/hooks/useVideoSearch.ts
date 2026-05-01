@@ -31,7 +31,7 @@ export function useVideoSearch() {
     if (searchQuery.includes('http://') || searchQuery.includes('https://')) {
       let title = 'Video Externo / Enlace Directo';
       let platform = 'Link Directo';
-      
+
       // Personalizamos un poco el título según el tipo de link
       if (searchQuery.includes('twitch.tv')) {
         title = 'Stream de Twitch 🟣';
@@ -47,17 +47,16 @@ export function useVideoSearch() {
         title: title,
         author: platform,
         // Usamos una imagen genérica chula porque no podemos sacar el thumbnail tan fácil de un MP4
-        thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=200&auto=format&fit=crop', 
-        duration: 'En vivo / Variable' 
+        thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=200&auto=format&fit=crop',
+        duration: 'En vivo / Variable'
       }]);
       return;
     }
 
-    // Debounce de 500ms para evitar saturar el servidor
-    timeoutRef.current = setTimeout(async () => {
+    const executeSearch = async (term: string) => {
       setIsSearching(true);
       try {
-        const res = await apiFetch<any[]>(`/youtube/search?q=${encodeURIComponent(searchQuery)}`);
+        const res = await apiFetch<any[]>(`/youtube/search?q=${encodeURIComponent(term)}`);
         setResults(res || []);
       } catch (err) {
         console.error('Search error:', err);
@@ -65,8 +64,27 @@ export function useVideoSearch() {
       } finally {
         setIsSearching(false);
       }
-    }, 500);
+    };
+
+    // Debounce de 1000ms para evitar saturar el servidor y que YouTube bloquee la IP
+    timeoutRef.current = setTimeout(() => {
+      executeSearch(searchQuery);
+    }, 1000);
   }, []);
+
+  const forceSearch = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (!query.trim() || query.includes('http://') || query.includes('https://')) return;
+    
+    setIsSearching(true);
+    apiFetch<any[]>(`/youtube/search?q=${encodeURIComponent(query)}`)
+      .then(res => setResults(res || []))
+      .catch(err => {
+        console.error('Search error:', err);
+        setResults([]);
+      })
+      .finally(() => setIsSearching(false));
+  }, [query]);
 
   const clearSearch = useCallback(() => {
     setQuery('');
@@ -79,6 +97,7 @@ export function useVideoSearch() {
     results,
     isSearching,
     search,
+    forceSearch,
     clearSearch,
   };
 }

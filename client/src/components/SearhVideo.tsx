@@ -17,7 +17,7 @@ export default function SearchVideo({
   showQueueButton = true,
   resultsPosition = 'absolute'
 }: SearchVideoProps) {
-  const { query, results, isSearching, search, clearSearch } = useVideoSearch();
+  const { query, results, isSearching, search, forceSearch, clearSearch } = useVideoSearch();
   const currentRoom = useRoomStore((state) => state.currentRoom);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
@@ -85,7 +85,13 @@ export default function SearchVideo({
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  if (query.trim()) handleSelect(query.trim());
+                  if (query.trim()) {
+                    if (query.includes('http://') || query.includes('https://') || query.includes('www.')) {
+                      handleSelect(query.trim());
+                    } else {
+                      forceSearch();
+                    }
+                  }
                 }
               }}
               onFocus={resetInactivityTimer}
@@ -98,11 +104,19 @@ export default function SearchVideo({
             <button
               type="button"
               onClick={() => {
-                if (query.trim()) handleSelect(query.trim());
+                if (query.trim()) {
+                  if (query.includes('http://') || query.includes('https://') || query.includes('www.')) {
+                    handleSelect(query.trim());
+                  } else {
+                    forceSearch();
+                  }
+                }
               }}
               className="bg-text-primary hover:opacity-90 text-bg-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer shadow-sm"
             >
-              {resultsPosition === 'relative' ? 'Ir' : 'Cambiar Video'}
+              {(query.includes('http://') || query.includes('https://') || query.includes('www.')) 
+                ? (resultsPosition === 'relative' ? 'Ir' : 'Cambiar Video') 
+                : 'Buscar'}
             </button>
           )}
         </div>
@@ -139,7 +153,7 @@ export default function SearchVideo({
                 <button
                   type="button"
                   onClick={() => handleSelect(video.url)}
-                  className="flex flex-1 gap-3 text-left cursor-pointer"
+                  className="flex flex-1 min-w-0 gap-2 sm:gap-3 text-left cursor-pointer"
                 >
                   <div className="relative shrink-0 w-24 aspect-video rounded-md overflow-hidden bg-black shadow-inner">
                     <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
@@ -161,7 +175,7 @@ export default function SearchVideo({
                   <button
                     type="button"
                     onClick={() => { handleAddToQueue(video); resetInactivityTimer(); }}
-                    className={`self-center p-2 rounded-lg transition-all ${
+                    className={`shrink-0 self-center p-2 rounded-lg transition-all ${
                       addedIds.has(video.id) 
                         ? 'text-success bg-success/10 scale-110' 
                         : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated'

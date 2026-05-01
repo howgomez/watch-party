@@ -199,8 +199,8 @@ export default function RoomPage() {
             <SearchVideo isHost={isHost} />
           </div>
 
-          {/* Video Player — max-h capped para que siempre queden visibles los controles */}
-          <div className="shrink-0 max-h-[35vh] lg:max-h-[65vh]">
+          {/* Video Player — max-w calculado para que la altura nunca exceda el viewport y se vean los controles */}
+          <div className="shrink-0 w-full mx-auto max-w-[calc(35vh*16/9)] lg:max-w-[calc(65vh*16/9)]">
             <VideoPlayer
               url={currentRoom.media_url}
               roomId={currentRoom.id}
